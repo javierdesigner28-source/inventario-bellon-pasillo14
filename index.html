@@ -4,15 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#14283f">
-<meta name="description" content="Control de inventario por ubicación para el pasillo 14 de Ferretería Bellón.">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png" sizes="192x192">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Inventario | Pasillo 14 - Ferretería Bellón</title>
 <style>
 :root{--navy:#14283f;--blue:#1769aa;--bg:#f3f6fa;--line:#e2e8f0;--muted:#64748b;--green:#168451;--orange:#b96a13;--red:#b42318}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#172334}
-header{background:var(--navy);color:white;padding:22px max(20px,calc((100% - 1180px)/2));}
+header{background:var(--navy);color:white;padding:22px max(20px,calc((100% - 1180px)/2))}
 header .top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
 h1{font-size:23px;margin:0 0 6px}.sub{color:#cbd8e6;font-size:13px}
 .aisle{border:1px solid #496078;border-radius:9px;padding:10px 13px;font-size:12px;line-height:1.6}
@@ -23,11 +20,12 @@ main{max-width:1180px;margin:24px auto;padding:0 18px}
 .panel{padding:19px;margin-bottom:17px}.panel h2{font-size:17px;margin:0 0 16px}
 .form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px}
-input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:10px 11px;font:14px Arial;background:white;color:#172334}
-input:focus,select:focus,textarea:focus{outline:2px solid #b8d9f5;border-color:var(--blue)}
+input,select{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:10px 11px;font:14px Arial;background:white;color:#172334}
+input:focus,select:focus{outline:2px solid #b8d9f5;border-color:var(--blue)}
 .field.full{grid-column:span 2}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
 button{border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px}
+button:disabled{opacity:.55;cursor:not-allowed}
 .primary{background:var(--blue);color:white}.secondary{background:#e8eef5;color:#26384b}.success{background:#e1f3e9;color:#12643d}.danger{background:#feeceb;color:var(--red)}
 .toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px}
 .toolbar .field{flex:1;min-width:190px}
@@ -42,9 +40,13 @@ tr:last-child td{border-bottom:0}.id{font-weight:700;color:#164e80}.loc{font-fam
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
 #message{font-size:13px;margin-top:10px;min-height:17px}
 footer{text-align:center;color:#8190a2;font-size:11px;padding:10px 15px 28px}
+#loginPanel{max-width:480px;margin:35px auto}
+#appContent[hidden],#loginPanel[hidden]{display:none}
+.syncbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#eaf4fc;border:1px solid #cfe3f5;padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px}
+.userline{margin-left:auto;color:#40556b}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:span 1}.panel{padding:14px}h1{font-size:19px}}
-@media print{body{background:white}header{padding:12px 0;background:white;color:#111;border-bottom:2px solid #222}header .sub{color:#444}.aisle{color:#111;border-color:#999}main{margin:10px auto;padding:0}.stats .stat,.panel{box-shadow:none;border:1px solid #bbb;break-inside:avoid}.form-panel,.toolbar,.row-actions,.no-print,footer{display:none!important}th,td{padding:7px;font-size:10px}table{min-width:0}}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:span 1}.panel{padding:14px}h1{font-size:19px}.userline{margin-left:0;width:100%}}
+@media print{body{background:white}header{padding:12px 0;background:white;color:#111;border-bottom:2px solid #222}header .sub{color:#444}.aisle{color:#111;border-color:#999}main{margin:10px auto;padding:0}.stats .stat,.panel{box-shadow:none;border:1px solid #bbb;break-inside:avoid}.form-panel,.toolbar,.row-actions,.no-print,footer,#loginPanel,.syncbar{display:none!important}th,td{padding:7px;font-size:10px}table{min-width:0}}
 </style>
 </head>
 <body>
@@ -54,7 +56,26 @@ footer{text-align:center;color:#8190a2;font-size:11px;padding:10px 15px 28px}
     <div class="aisle"><b>PASILLO 14</b><br>Desde 14.10.01.01<br>Hasta 14.53.07.02</div>
   </div>
 </header>
+
+<section id="loginPanel" class="panel">
+  <h2>Acceso al inventario</h2>
+  <p class="note">Inicia sesión con el usuario creado en Firebase Authentication.</p>
+  <form id="loginForm">
+    <div class="field"><label for="email">Correo electrónico</label><input id="email" type="email" required autocomplete="username"></div>
+    <div class="field" style="margin-top:12px"><label for="password">Contraseña</label><input id="password" type="password" required autocomplete="current-password"></div>
+    <div class="actions"><button class="primary" type="submit" id="loginBtn">Iniciar sesión</button></div>
+    <div id="loginMessage" role="status"></div>
+  </form>
+</section>
+
+<div id="appContent" hidden>
 <main>
+  <div class="syncbar">
+    <strong id="connectionStatus">Conectando con la nube…</strong>
+    <button class="secondary" id="importBtn" type="button">Importar registros guardados en este dispositivo</button>
+    <button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button>
+    <span class="userline" id="userEmail"></span>
+  </div>
   <section class="stats">
     <div class="stat"><small>Productos registrados</small><strong id="total">0</strong></div>
     <div class="stat"><small>Contados</small><strong id="counted">0</strong></div>
@@ -100,18 +121,28 @@ footer{text-align:center;color:#8190a2;font-size:11px;padding:10px 15px 28px}
     </div>
   </section>
 </main>
-<footer>Los datos se guardan en este navegador y en este dispositivo.</footer>
+</div>
+<footer>Inventario Bellón · Los cambios se sincronizan mediante Firebase cuando hay conexión a Internet.</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC1Uyz33Ijs66Xr_RaIB1Ow-ISgGC4rRjo",
+  authDomain: "inventario-pasillo-14.firebaseapp.com",
+  projectId: "inventario-pasillo-14",
+  storageBucket: "inventario-pasillo-14.firebasestorage.app",
+  messagingSenderId: "330342183692",
+  appId: "1:330342183692:web:2f0e6d0726aecb4d520f29"
+};
+
 const STORAGE_KEY = "bellon_inventario_pasillo14_v1";
 const START = [14,10,1,1], END = [14,53,7,2];
-let items = [];
-let editingId = null;
-
-try { items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) { items = []; }
-
+let items = [], editingId = null, db = null, auth = null, unsubscribe = null;
+let cloudReady = false;
 const $ = id => document.getElementById(id);
 const form = $("inventoryForm");
-const fields = ["productId","location","description","quantity","status","notes"];
 
 function parseLocation(value) {
   const match = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{2})$/);
@@ -125,10 +156,13 @@ function validLocation(value) {
   const parts = parseLocation(value);
   return !!parts && compareTuple(parts, START) >= 0 && compareTuple(parts, END) <= 0;
 }
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
 function showMessage(text, error=false) {
   $("message").textContent = text;
   $("message").style.color = error ? "#b42318" : "#168451";
+}
+function showLoginMessage(text,error=false) {
+  $("loginMessage").textContent=text;
+  $("loginMessage").style.color=error?"#b42318":"#168451";
 }
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -139,20 +173,16 @@ function render() {
   $("counted").textContent = counted;
   $("pending").textContent = items.length-counted;
   $("units").textContent = items.reduce((sum,x)=>sum+(Number(x.quantity)||0),0);
-
   const query = $("search").value.trim().toLowerCase();
   const filter = $("filterStatus").value;
   const shown = items.filter(x => {
     const matches = [x.productId,x.location,x.description,x.notes].join(" ").toLowerCase().includes(query);
     return matches && (filter==="Todos" || x.status===filter);
   }).sort((a,b)=>a.location.localeCompare(b.location,undefined,{numeric:true}) || a.productId.localeCompare(b.productId,undefined,{numeric:true}));
-
   $("tableBody").innerHTML = shown.map(x => `
     <tr>
-      <td class="id">${escapeHTML(x.productId)}</td>
-      <td class="loc">${escapeHTML(x.location)}</td>
-      <td>${escapeHTML(x.description || "—")}</td>
-      <td>${escapeHTML(x.quantity)}</td>
+      <td class="id">${escapeHTML(x.productId)}</td><td class="loc">${escapeHTML(x.location)}</td>
+      <td>${escapeHTML(x.description || "—")}</td><td>${escapeHTML(x.quantity)}</td>
       <td><span class="status ${x.status==="Contado"?"done":"pending"}">${escapeHTML(x.status)}</span></td>
       <td>${escapeHTML(x.notes || "—")}</td>
       <td class="no-print"><div class="row-actions">
@@ -169,48 +199,90 @@ function resetForm() {
   $("cancelEdit").hidden=true;
   $("quantity").value=0;
 }
-form.addEventListener("submit", e => {
-  e.preventDefault();
-  const productId=$("productId").value.trim();
-  const location=$("location").value.trim();
-  const description=$("description").value.trim();
-  const quantity=Number($("quantity").value);
-  const status=$("status").value;
-  const notes=$("notes").value.trim();
+function docId(productId, location) {
+  return encodeURIComponent(productId.trim()+"__"+location.trim());
+}
+async function saveRecord(record) {
+  if (!auth.currentUser) throw new Error("Inicia sesión nuevamente.");
+  await db.collection("products").doc(docId(record.productId,record.location)).set({
+    productId:record.productId, location:record.location, description:record.description||"",
+    quantity:Number(record.quantity)||0, status:record.status||"Pendiente", notes:record.notes||"",
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy:auth.currentUser.uid
+  },{merge:true});
+}
+function startCloudListener() {
+  if(unsubscribe) unsubscribe();
+  $("connectionStatus").textContent="Sincronizando con Firebase…";
+  unsubscribe=db.collection("products").onSnapshot(snapshot=>{
+    items=snapshot.docs.map(d=>({key:d.id,...d.data()}));
+    cloudReady=true;
+    $("connectionStatus").textContent=navigator.onLine?"Sincronizado con la nube":"Sin conexión · mostrando datos guardados";
+    render();
+  },err=>{
+    $("connectionStatus").textContent="Error de sincronización: "+err.message;
+    showMessage("No se pudieron leer los datos. Revisa las reglas de Firestore.",true);
+  });
+}
+auth = firebase.initializeApp(firebaseConfig).auth();
+db = firebase.app().firestore();
+try { db.enablePersistence({synchronizeTabs:true}).catch(()=>{}); } catch(e) {}
 
-  if(!validLocation(location)){
-    showMessage("Ubicación inválida. Usa el formato 14.XX.XX.XX y verifica que esté entre 14.10.01.01 y 14.53.07.02.",true); return;
-  }
-  if(!productId || !Number.isInteger(quantity) || quantity<0){
-    showMessage("Revisa el ID y la cantidad. La cantidad debe ser un número entero igual o mayor que cero.",true); return;
-  }
-  const duplicate=items.find(x=>x.productId===productId && x.location===location && x.key!==editingId);
-  if(duplicate){showMessage("Ese ID ya está registrado en esa ubicación. Puedes editar el registro existente.",true);return;}
-
-  const record={key:editingId || (Date.now()+"_"+Math.random().toString(16).slice(2)),productId,location,description,quantity,status,notes};
-  if(editingId){items=items.map(x=>x.key===editingId?record:x);showMessage("Registro actualizado correctamente.");}
-  else {items.push(record);showMessage("Producto guardado correctamente.");}
-  save(); resetForm(); render();
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault(); $("loginBtn").disabled=true; showLoginMessage("Verificando acceso…");
+  try { await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value); $("password").value=""; }
+  catch(err){showLoginMessage("No se pudo iniciar sesión: "+err.message,true);}
+  finally{$("loginBtn").disabled=false;}
 });
-window.editItem = encodedKey => {
-  const key=decodeURIComponent(encodedKey), x=items.find(i=>i.key===key); if(!x)return;
-  editingId=key;
-  $("productId").value=x.productId; $("location").value=x.location;
-  $("description").value=x.description; $("quantity").value=x.quantity;
-  $("status").value=x.status; $("notes").value=x.notes;
-  $("formTitle").textContent="Editar producto";
-  $("saveBtn").textContent="Guardar cambios"; $("cancelEdit").hidden=false;
-  showMessage("Editando el registro seleccionado.");
-  window.scrollTo({top:0,behavior:"smooth"});
+auth.onAuthStateChanged(user=>{
+  if(user){
+    $("loginPanel").hidden=true; $("appContent").hidden=false; $("userEmail").textContent=user.email||"Sesión activa";
+    startCloudListener();
+  }else{
+    if(unsubscribe){unsubscribe();unsubscribe=null;}
+    $("appContent").hidden=true; $("loginPanel").hidden=false; items=[]; cloudReady=false;
+  }
+});
+$("logoutBtn").addEventListener("click",()=>auth.signOut());
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const productId=$("productId").value.trim(), location=$("location").value.trim();
+  const description=$("description").value.trim(), quantity=Number($("quantity").value);
+  const status=$("status").value, notes=$("notes").value.trim();
+  if(!validLocation(location)){showMessage("Ubicación inválida. Usa 14.XX.XX.XX y verifica el rango del pasillo 14.",true);return;}
+  if(!productId||!Number.isInteger(quantity)||quantity<0){showMessage("Revisa el ID y la cantidad. Debe ser un entero igual o mayor que cero.",true);return;}
+  const duplicate=items.find(x=>x.productId===productId&&x.location===location&&x.key!==editingId);
+  if(duplicate){showMessage("Ese ID ya está registrado en esa ubicación.",true);return;}
+  const previousKey=editingId;
+  const newKey=docId(productId,location);
+  const record={key:newKey,productId,location,description,quantity,status,notes};
+  $("saveBtn").disabled=true;
+  try {
+    await saveRecord(record);
+    if(previousKey && previousKey!==newKey) await db.collection("products").doc(previousKey).delete();
+    showMessage(previousKey?"Cambios guardados en la nube.":"Producto guardado en la nube.");
+    resetForm();
+  }
+  catch(err){showMessage("No se pudo guardar: "+err.message,true);}
+  finally{$("saveBtn").disabled=false;}
+});
+window.editItem=encodedKey=>{
+  const key=decodeURIComponent(encodedKey),x=items.find(i=>i.key===key);if(!x)return;
+  editingId=key;$("productId").value=x.productId;$("location").value=x.location;
+  $("description").value=x.description||"";$("quantity").value=x.quantity??0;
+  $("status").value=x.status||"Pendiente";$("notes").value=x.notes||"";
+  $("formTitle").textContent="Editar producto";$("saveBtn").textContent="Guardar cambios";$("cancelEdit").hidden=false;
+  showMessage("Editando el registro seleccionado.");window.scrollTo({top:0,behavior:"smooth"});
 };
-window.deleteItem = encodedKey => {
-  const key=decodeURIComponent(encodedKey), x=items.find(i=>i.key===key); if(!x)return;
+window.deleteItem=async encodedKey=>{
+  const key=decodeURIComponent(encodedKey),x=items.find(i=>i.key===key);if(!x)return;
   if(confirm(`¿Eliminar el producto ${x.productId} de la ubicación ${x.location}?`)){
-    items=items.filter(i=>i.key!==key);save();render();showMessage("Registro eliminado.");
+    try{await db.collection("products").doc(key).delete();showMessage("Registro eliminado de la nube.");}
+    catch(err){showMessage("No se pudo eliminar: "+err.message,true);}
   }
 };
 $("cancelEdit").addEventListener("click",()=>{resetForm();showMessage("Edición cancelada.");});
-$("clearBtn").addEventListener("click",()=>{setTimeout(()=>showMessage("Formulario limpio."),0);});
+$("clearBtn").addEventListener("click",()=>setTimeout(()=>showMessage("Formulario limpio."),0));
 $("search").addEventListener("input",render);
 $("filterStatus").addEventListener("change",render);
 $("printBtn").addEventListener("click",()=>window.print());
@@ -220,18 +292,29 @@ $("exportBtn").addEventListener("click",()=>{
     .map(x=>[x.productId,x.location,x.description,x.quantity,x.status,x.notes]);
   const csv=[headers,...rows].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
   const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download="inventario_pasillo_14.csv";a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="inventario_pasillo_14.csv";a.click();URL.revokeObjectURL(url);
 });
-render();
-// Habilitar funcionamiento sin conexión después de la primera visita.
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(err => {
-      console.warn("No se pudo activar el modo sin conexión:", err);
-    });
-  });
-}
+$("importBtn").addEventListener("click",async()=>{
+  let local=[];
+  try{local=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}catch(e){}
+  if(!Array.isArray(local)||!local.length){showMessage("Este dispositivo no tiene registros locales para importar.",true);return;}
+  if(!confirm(`Se encontraron ${local.length} registros guardados en este dispositivo. Se copiarán a la nube; los registros que ya existan con el mismo ID y ubicación se omitirán. ¿Continuar?`))return;
+  $("importBtn").disabled=true;let added=0,skipped=0,failed=0;
+  for(const old of local){
+    try{
+      if(!old.productId||!old.location||!validLocation(old.location)){failed++;continue;}
+      const id=docId(old.productId,old.location),ref=db.collection("products").doc(id),existing=await ref.get();
+      if(existing.exists){skipped++;continue;}
+      await ref.set({productId:String(old.productId),location:String(old.location),description:old.description||"",quantity:Number(old.quantity)||0,status:old.status||"Pendiente",notes:old.notes||"",updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:auth.currentUser.uid});
+      added++;
+    }catch(e){failed++;}
+  }
+  $("importBtn").disabled=false;
+  showMessage(`Importación terminada: ${added} agregados, ${skipped} ya existían, ${failed} con error. No se borraron los datos locales.`);
+});
+window.addEventListener("online",()=>{$("connectionStatus").textContent="Conexión recuperada · sincronizando…";});
+window.addEventListener("offline",()=>{$("connectionStatus").textContent="Sin conexión · los cambios se sincronizarán al volver Internet";});
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script>
 </body>
 </html>
