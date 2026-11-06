@@ -4,13 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F47B20">
+<meta name="description" content="Inventario Bellón: control de productos por ubicación, Pasillo 14.">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Inventario | Pasillo 14 - Ferretería Bellón</title>
 <style>
 :root{--navy:#191919;--blue:#F47B20;--bg:#FFF8F2;--line:#F0DFD2;--muted:#75675E;--green:#168451;--orange:#B85A12;--red:#B42318;--ink:#211A16}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--orange)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
 header{background:var(--navy);color:white;padding:22px max(20px,calc((100% - 1180px)/2))}
-header .top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+header .top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:16px;min-width:0}
+.brand-logo{width:92px;height:112px;object-fit:contain;background:#fff;border-radius:10px;padding:5px;flex:0 0 auto}
+.brand-copy h1{font-size:23px;margin:0 0 6px}.brand-copy .sub{color:#f4d8c4;font-size:13px}
+.aisle{border:1px solid #6b5142;border-radius:9px;padding:10px 13px;font-size:12px;line-height:1.6;background:#242020}
 h1{font-size:23px;margin:0 0 6px}.sub{color:#cbd8e6;font-size:13px}
 .aisle{border:1px solid #496078;border-radius:9px;padding:10px 13px;font-size:12px;line-height:1.6}
 main{max-width:1180px;margin:24px auto;padding:0 18px}
@@ -45,14 +50,14 @@ footer{text-align:center;color:#8190a2;font-size:11px;padding:10px 15px 28px}
 .syncbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#FFF0E3;border:1px solid #F5CBAA;padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px}
 .userline{margin-left:auto;color:#6A4630}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:span 1}.panel{padding:14px}h1{font-size:19px}.userline{margin-left:0;width:100%}}
+@media(max-width:480px){.brand{gap:10px}.brand-logo{width:70px;height:86px}.brand-copy h1{font-size:18px}.brand-copy .sub{font-size:11px}.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:span 1}.panel{padding:14px}h1{font-size:19px}.userline{margin-left:0;width:100%}}
 @media print{body{background:white}header{padding:12px 0;background:white;color:#111;border-bottom:2px solid #222}header .sub{color:#444}.aisle{color:#111;border-color:#999}main{margin:10px auto;padding:0}.stats .stat,.panel{box-shadow:none;border:1px solid #bbb;break-inside:avoid}.form-panel,.toolbar,.row-actions,.no-print,footer,#loginPanel,.syncbar{display:none!important}th,td{padding:7px;font-size:10px}table{min-width:0}}
 </style>
 </head>
 <body>
 <header>
   <div class="top">
-    <div><h1>Control de inventario</h1><div class="sub">Ferretería Bellón · Registro y conteo por ubicación</div></div>
+    <div class="brand"><img class="brand-logo" src="images/bellon-logo.jpg" alt="Logo oficial de Ferretería Bellón"><div class="brand-copy"><h1>Control de inventario</h1><div class="sub">Ferretería Bellón · Registro y conteo por ubicación</div></div></div>
     <div class="aisle"><b>PASILLO 14</b><br>Desde 14.10.01.01<br>Hasta 14.53.07.02</div>
   </div>
 </header>
