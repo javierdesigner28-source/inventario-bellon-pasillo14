@@ -1,7 +1,7 @@
 {
   "id": "./",
   "name": "Inventario Bellón - Pasillo 14",
-  "short_name": "Bellón P14",
+  "short_name": "Inventario P14",
   "description": "Control de inventario por ubicación para el pasillo 14.",
   "lang": "es",
   "start_url": "./",
