@@ -1,15 +1,15 @@
 {
   "id": "./",
   "name": "Inventario Bellón - Pasillo 14",
-  "short_name": "Inventario P14",
+  "short_name": "Bellón P14",
   "description": "Control de inventario por ubicación para el pasillo 14.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f6fa",
-  "theme_color": "#14283f",
+  "background_color": "#FFF8F2",
+  "theme_color": "#F47B20",
   "prefer_related_applications": false,
   "icons": [
     {
