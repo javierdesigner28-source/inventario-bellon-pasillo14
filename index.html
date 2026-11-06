@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14283f">
+<meta name="description" content="Control de inventario por ubicación para el pasillo 14 de Ferretería Bellón.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Inventario | Pasillo 14 - Ferretería Bellón</title>
+<style>
+:root{--navy:#14283f;--blue:#1769aa;--bg:#f3f6fa;--line:#e2e8f0;--muted:#64748b;--green:#168451;--orange:#b96a13;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#172334}
+header{background:var(--navy);color:white;padding:22px max(20px,calc((100% - 1180px)/2));}
+header .top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+h1{font-size:23px;margin:0 0 6px}.sub{color:#cbd8e6;font-size:13px}
+.aisle{border:1px solid #496078;border-radius:9px;padding:10px 13px;font-size:12px;line-height:1.6}
+main{max-width:1180px;margin:24px auto;padding:0 18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat,.panel{background:white;border:1px solid var(--line);border-radius:12px}
+.stat{padding:16px}.stat small{color:var(--muted);display:block;margin-bottom:8px}.stat strong{font-size:25px}
+.panel{padding:19px;margin-bottom:17px}.panel h2{font-size:17px;margin:0 0 16px}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px}
+input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:10px 11px;font:14px Arial;background:white;color:#172334}
+input:focus,select:focus,textarea:focus{outline:2px solid #b8d9f5;border-color:var(--blue)}
+.field.full{grid-column:span 2}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+button{border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13px}
+.primary{background:var(--blue);color:white}.secondary{background:#e8eef5;color:#26384b}.success{background:#e1f3e9;color:#12643d}.danger{background:#feeceb;color:var(--red)}
+.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px}
+.toolbar .field{flex:1;min-width:190px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px}
+th{color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#f8fafc}
+tr:last-child td{border-bottom:0}.id{font-weight:700;color:#164e80}.loc{font-family:monospace;font-weight:700}
+.status{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700}
+.done{background:#e2f5e9;color:#137347}.pending{background:#fff1dc;color:#9a570e}
+.row-actions{display:flex;gap:6px}.row-actions button{padding:7px 9px;font-size:11px}
+.empty{text-align:center;color:var(--muted);padding:28px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+#message{font-size:13px;margin-top:10px;min-height:17px}
+footer{text-align:center;color:#8190a2;font-size:11px;padding:10px 15px 28px}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:span 1}.panel{padding:14px}h1{font-size:19px}}
+@media print{body{background:white}header{padding:12px 0;background:white;color:#111;border-bottom:2px solid #222}header .sub{color:#444}.aisle{color:#111;border-color:#999}main{margin:10px auto;padding:0}.stats .stat,.panel{box-shadow:none;border:1px solid #bbb;break-inside:avoid}.form-panel,.toolbar,.row-actions,.no-print,footer{display:none!important}th,td{padding:7px;font-size:10px}table{min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div><h1>Control de inventario</h1><div class="sub">Ferretería Bellón · Registro y conteo por ubicación</div></div>
+    <div class="aisle"><b>PASILLO 14</b><br>Desde 14.10.01.01<br>Hasta 14.53.07.02</div>
+  </div>
+</header>
+<main>
+  <section class="stats">
+    <div class="stat"><small>Productos registrados</small><strong id="total">0</strong></div>
+    <div class="stat"><small>Contados</small><strong id="counted">0</strong></div>
+    <div class="stat"><small>Pendientes</small><strong id="pending">0</strong></div>
+    <div class="stat"><small>Unidades registradas</small><strong id="units">0</strong></div>
+  </section>
+
+  <section class="panel form-panel">
+    <h2 id="formTitle">Registrar producto</h2>
+    <form id="inventoryForm">
+      <div class="form-grid">
+        <div class="field"><label for="productId">ID del producto *</label><input id="productId" required placeholder="Ej. 124576" autocomplete="off"></div>
+        <div class="field"><label for="location">Ubicación *</label><input id="location" required placeholder="14.10.01.01" pattern="14\.\d{2}\.\d{2}\.\d{2}" autocomplete="off"></div>
+        <div class="field"><label for="description">Descripción del producto</label><input id="description" placeholder="Nombre o descripción"></div>
+        <div class="field"><label for="quantity">Cantidad física *</label><input id="quantity" type="number" min="0" step="1" required value="0"></div>
+        <div class="field"><label for="status">Estado del conteo</label><select id="status"><option value="Pendiente">Pendiente</option><option value="Contado">Contado</option></select></div>
+        <div class="field full"><label for="notes">Observaciones</label><input id="notes" placeholder="Ej. caja abierta, producto dañado, diferencia..."></div>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" id="saveBtn">Guardar producto</button>
+        <button class="secondary" type="button" id="cancelEdit" hidden>Cancelar edición</button>
+        <button class="secondary" type="reset" id="clearBtn">Limpiar</button>
+      </div>
+      <div id="message" role="status"></div>
+      <div class="note">La ubicación debe estar dentro del rango del pasillo 14. Ejemplo: el ID 124576 puede registrarse en 14.10.01.01.</div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Inventario del pasillo</h2>
+    <div class="toolbar">
+      <div class="field"><label for="search">Buscar por ID, ubicación o descripción</label><input id="search" placeholder="Escribe para buscar..."></div>
+      <div class="field" style="max-width:190px"><label for="filterStatus">Filtrar por estado</label><select id="filterStatus"><option value="Todos">Todos</option><option value="Pendiente">Pendientes</option><option value="Contado">Contados</option></select></div>
+      <button class="secondary no-print" id="exportBtn" type="button">Exportar CSV</button>
+      <button class="secondary no-print" id="printBtn" type="button">Imprimir</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Ubicación</th><th>Descripción</th><th>Cantidad</th><th>Estado</th><th>Observaciones</th><th class="no-print">Acciones</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="empty" class="empty">Todavía no hay productos registrados.</div>
+    </div>
+  </section>
+</main>
+<footer>Los datos se guardan en este navegador y en este dispositivo.</footer>
+<script>
+const STORAGE_KEY = "bellon_inventario_pasillo14_v1";
+const START = [14,10,1,1], END = [14,53,7,2];
+let items = [];
+let editingId = null;
+
+try { items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) { items = []; }
+
+const $ = id => document.getElementById(id);
+const form = $("inventoryForm");
+const fields = ["productId","location","description","quantity","status","notes"];
+
+function parseLocation(value) {
+  const match = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{2})\.(\d{2})$/);
+  return match ? match.slice(1).map(Number) : null;
+}
+function compareTuple(a,b) {
+  for(let i=0;i<4;i++){ if(a[i]!==b[i]) return a[i]-b[i]; }
+  return 0;
+}
+function validLocation(value) {
+  const parts = parseLocation(value);
+  return !!parts && compareTuple(parts, START) >= 0 && compareTuple(parts, END) <= 0;
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function showMessage(text, error=false) {
+  $("message").textContent = text;
+  $("message").style.color = error ? "#b42318" : "#168451";
+}
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function render() {
+  const counted = items.filter(x=>x.status==="Contado").length;
+  $("total").textContent = items.length;
+  $("counted").textContent = counted;
+  $("pending").textContent = items.length-counted;
+  $("units").textContent = items.reduce((sum,x)=>sum+(Number(x.quantity)||0),0);
+
+  const query = $("search").value.trim().toLowerCase();
+  const filter = $("filterStatus").value;
+  const shown = items.filter(x => {
+    const matches = [x.productId,x.location,x.description,x.notes].join(" ").toLowerCase().includes(query);
+    return matches && (filter==="Todos" || x.status===filter);
+  }).sort((a,b)=>a.location.localeCompare(b.location,undefined,{numeric:true}) || a.productId.localeCompare(b.productId,undefined,{numeric:true}));
+
+  $("tableBody").innerHTML = shown.map(x => `
+    <tr>
+      <td class="id">${escapeHTML(x.productId)}</td>
+      <td class="loc">${escapeHTML(x.location)}</td>
+      <td>${escapeHTML(x.description || "—")}</td>
+      <td>${escapeHTML(x.quantity)}</td>
+      <td><span class="status ${x.status==="Contado"?"done":"pending"}">${escapeHTML(x.status)}</span></td>
+      <td>${escapeHTML(x.notes || "—")}</td>
+      <td class="no-print"><div class="row-actions">
+        <button class="secondary" onclick="editItem('${encodeURIComponent(x.key)}')">Editar</button>
+        <button class="danger" onclick="deleteItem('${encodeURIComponent(x.key)}')">Eliminar</button>
+      </div></td>
+    </tr>`).join("");
+  $("empty").style.display = shown.length ? "none" : "block";
+}
+function resetForm() {
+  form.reset(); editingId=null;
+  $("formTitle").textContent="Registrar producto";
+  $("saveBtn").textContent="Guardar producto";
+  $("cancelEdit").hidden=true;
+  $("quantity").value=0;
+}
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const productId=$("productId").value.trim();
+  const location=$("location").value.trim();
+  const description=$("description").value.trim();
+  const quantity=Number($("quantity").value);
+  const status=$("status").value;
+  const notes=$("notes").value.trim();
+
+  if(!validLocation(location)){
+    showMessage("Ubicación inválida. Usa el formato 14.XX.XX.XX y verifica que esté entre 14.10.01.01 y 14.53.07.02.",true); return;
+  }
+  if(!productId || !Number.isInteger(quantity) || quantity<0){
+    showMessage("Revisa el ID y la cantidad. La cantidad debe ser un número entero igual o mayor que cero.",true); return;
+  }
+  const duplicate=items.find(x=>x.productId===productId && x.location===location && x.key!==editingId);
+  if(duplicate){showMessage("Ese ID ya está registrado en esa ubicación. Puedes editar el registro existente.",true);return;}
+
+  const record={key:editingId || (Date.now()+"_"+Math.random().toString(16).slice(2)),productId,location,description,quantity,status,notes};
+  if(editingId){items=items.map(x=>x.key===editingId?record:x);showMessage("Registro actualizado correctamente.");}
+  else {items.push(record);showMessage("Producto guardado correctamente.");}
+  save(); resetForm(); render();
+});
+window.editItem = encodedKey => {
+  const key=decodeURIComponent(encodedKey), x=items.find(i=>i.key===key); if(!x)return;
+  editingId=key;
+  $("productId").value=x.productId; $("location").value=x.location;
+  $("description").value=x.description; $("quantity").value=x.quantity;
+  $("status").value=x.status; $("notes").value=x.notes;
+  $("formTitle").textContent="Editar producto";
+  $("saveBtn").textContent="Guardar cambios"; $("cancelEdit").hidden=false;
+  showMessage("Editando el registro seleccionado.");
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+window.deleteItem = encodedKey => {
+  const key=decodeURIComponent(encodedKey), x=items.find(i=>i.key===key); if(!x)return;
+  if(confirm(`¿Eliminar el producto ${x.productId} de la ubicación ${x.location}?`)){
+    items=items.filter(i=>i.key!==key);save();render();showMessage("Registro eliminado.");
+  }
+};
+$("cancelEdit").addEventListener("click",()=>{resetForm();showMessage("Edición cancelada.");});
+$("clearBtn").addEventListener("click",()=>{setTimeout(()=>showMessage("Formulario limpio."),0);});
+$("search").addEventListener("input",render);
+$("filterStatus").addEventListener("change",render);
+$("printBtn").addEventListener("click",()=>window.print());
+$("exportBtn").addEventListener("click",()=>{
+  const headers=["ID","Ubicación","Descripción","Cantidad","Estado","Observaciones"];
+  const rows=items.slice().sort((a,b)=>a.location.localeCompare(b.location,undefined,{numeric:true}))
+    .map(x=>[x.productId,x.location,x.description,x.quantity,x.status,x.notes]);
+  const csv=[headers,...rows].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="inventario_pasillo_14.csv";a.click();URL.revokeObjectURL(url);
+});
+render();
+// Habilitar funcionamiento sin conexión después de la primera visita.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(err => {
+      console.warn("No se pudo activar el modo sin conexión:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+INVENTARIO BELLÓN - PASILLO 14 (PWA)
+
+ARCHIVOS:
+- index.html: aplicación
+- manifest.webmanifest: nombre, icono y configuración de instalación
+- service-worker.js: caché para abrir la aplicación sin conexión después de la primera visita
+- icons/: iconos de la aplicación
+
+PUBLICACIÓN GRATUITA:
+1. Crea una cuenta en https://github.com/ si no tienes una.
+2. Crea un repositorio nuevo llamado inventario-bellon-pasillo14.
+3. Déjalo en Public y crea el repositorio.
+4. En el repositorio, selecciona Add file > Upload files.
+5. Sube TODOS los archivos y la carpeta icons (no subas el ZIP; descomprímelo primero).
+6. Pulsa Commit changes.
+7. En Settings > Pages, en Build and deployment selecciona Deploy from a branch.
+8. Elige Branch: main y Folder: /(root), luego Save.
+9. Espera a que GitHub Pages publique el sitio. La dirección tendrá esta forma:
+   https://TU-USUARIO.github.io/inventario-bellon-pasillo14/
+
+INSTALACIÓN EN ANDROID:
+1. Abre la dirección publicada con Google Chrome.
+2. Espera a que cargue por completo.
+3. Pulsa ⋮ > Instalar aplicación (o Añadir a pantalla de inicio).
+4. Confirma. Aparecerá el icono Inventario P14.
+
+IMPORTANTE SOBRE LOS DATOS:
+- El modo sin conexión funciona después de abrir la web una primera vez con Internet.
+- Los registros se guardan localmente en el navegador/dispositivo mediante localStorage.
+- Los registros del celular NO se sincronizan automáticamente con los de la PC ni con otros celulares.
+- Exporta el CSV periódicamente como copia de seguridad.
+- Si borras los datos del navegador, podrías perder los registros guardados en ese dispositivo.
